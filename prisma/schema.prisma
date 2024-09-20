@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model player {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String        @db.VarChar
+  alias       String?       @unique @db.VarChar
+  level       Int           @default(0) @db.SmallInt
+  game_player game_player[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model game {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  date        DateTime?     @unique @db.Date
+  start       DateTime?     @db.Time(6)
+  end         DateTime?     @db.Time(6)
+  location    String?       @db.VarChar
+  game_player game_player[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model game_player {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  game_id   String  @db.Uuid
+  player_id String  @db.Uuid
+  paid      Boolean @default(false)
+  game      game    @relation(fields: [game_id], references: [id], onDelete: Cascade)
+  player    player  @relation(fields: [player_id], references: [id], onDelete: Cascade)
+}
